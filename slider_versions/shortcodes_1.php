@@ -14,13 +14,7 @@ function return_dboxlite_slider($slider_id='',$offset=0,$data=array()) {
 	foreach($default_dboxlite_slider_settings as $key=>$value){
 		if(!isset($dboxlite_slider_curr[$key])) $dboxlite_slider_curr[$key]='';
 	}
- 
-	if($dboxlite_slider['multiple_sliders'] == '1' and is_singular() and (empty($slider_id) or !isset($slider_id))){
-		global $post;
-		$post_id = $post->ID;
-		$slider_id = get_dboxlite_slider_for_the_post($post_id);
-	}
-	if(empty($slider_id) or !isset($slider_id)){
+ 	if(empty($slider_id) or !isset($slider_id)){
 	  $slider_id = '1';
 	}
 	$slider_html='';

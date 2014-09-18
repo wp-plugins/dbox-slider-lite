@@ -2,7 +2,7 @@
 Plugin Name: Dbox Slider Lite
 Plugin URI: http://slidervilla.com/dbox-lite/
 Description: DBOXLITE slider adds a very beautiful 3D responsive Slider to your site with a graceful fallback on IE and Old browsers.
-Version: 1.0
+Version: 1.1
 Author: SliderVilla
 Author URI: http://slidervilla.com/
 Wordpress version supported: 3.5 and above
@@ -23,15 +23,16 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 //defined global variables and constants here
-global $dboxlite_slider,$default_dboxlite_slider_settings;
+global $dboxlite_slider,$default_dboxlite_slider_settings,$dboxlite_db_version;
 $dboxlite_slider = get_option('dbox_slider_options');
+$dboxlite_db_version='1.1';
 $default_dboxlite_slider_settings = array('speed'=>'6', 
 						   'no_posts'=>'8',
 						   'width'=>'640',
 						   'height'=>'460',
 						   'bg_color'=>'#ffffff',
 						   'bg'=>'0',	
-						   'img_pick'=>array('1','slider_thumbnail','1','1','1','0'), //use custom field/key, name of the key, use post featured image, pick the image attachment, attachment order,scan images
+						   'img_pick'=>array('1','dboxliteslider_thumbnail','1','1','1','0'), //use custom field/key, name of the key, use post featured image, pick the image attachment, attachment order,scan images
 						   'image_only'=>'0',
 						   'ptitle_font'=>'Trebuchet MS,sans-serif',
 						   'ptitle_fontg'=>'',
@@ -56,7 +57,6 @@ $default_dboxlite_slider_settings = array('speed'=>'6',
 						   'more'=>'',
 						   'user_level'=>'edit_others_posts',
 						   'crop'=>'0',
-						   'multiple_sliders'=>'1',
 						   'slide_nav_limit'=>'5',
 						   'stylesheet'=>'default',
 						   'rand'=>'0',
@@ -65,6 +65,7 @@ $default_dboxlite_slider_settings = array('speed'=>'6',
 						   'navpos'=>'bottom',
 						   'custom_post'=>'0',
 						   'preview'=>'2',
+						   'slider_id'=>'1',
 						   'catg_slug'=>'',
 						   'css'=>'',
 						   'setname'=>'Set',
@@ -96,7 +97,7 @@ $default_dboxlite_slider_settings = array('speed'=>'6',
 define('DBOXLITE_SLIDER_TABLE','dbox_slider'); //Slider TABLE NAME
 define('DBOXLITE_SLIDER_META','dbox_slider_meta'); //Meta TABLE NAME
 define('DBOXLITE_SLIDER_POST_META','dbox_slider_postmeta'); //Meta TABLE NAME
-define("DBOXLITE_SLIDER_VER","1.0",false);//Current Version of DboxLite Slider
+define("DBOXLITE_SLIDER_VER","1.1",false);//Current Version of DboxLite Slider
 if ( ! defined( 'DBOXLITE_SLIDER_PLUGIN_BASENAME' ) )
 	define( 'DBOXLITE_SLIDER_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 if ( ! defined( 'DBOXLITE_SLIDER_CSS_DIR' ) ){
@@ -106,18 +107,20 @@ if ( ! defined( 'DBOXLITE_SLIDER_CSS_DIR' ) ){
 load_plugin_textdomain('dboxlite-slider', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');
 
 function install_dboxlite_slider() {
-	global $wpdb, $table_prefix;
-	$table_name = $table_prefix.DBOXLITE_SLIDER_TABLE;
-	if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+	global $wpdb, $table_prefix, $dboxlite_db_version;
+	$installed_ver = get_option( "dboxlite_db_version");
+	if( $installed_ver != $dboxlite_db_version ) {
+		$table_name = $table_prefix.DBOXLITE_SLIDER_TABLE;
+		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 		$sql = "CREATE TABLE $table_name (
-					id int(5) NOT NULL AUTO_INCREMENT,
-					post_id int(11) NOT NULL,
-					date datetime NOT NULL,
-					slider_id int(5) NOT NULL DEFAULT '1',
-					slide_order int(5) NOT NULL DEFAULT '0',
-					UNIQUE KEY id(id)
-				);";
-		$rs = $wpdb->query($sql);
+						id int(5) NOT NULL AUTO_INCREMENT,
+						post_id int(11) NOT NULL,
+						date datetime NOT NULL,
+						slider_id int(5) NOT NULL DEFAULT '1',
+						slide_order int(5) NOT NULL DEFAULT '0',
+						UNIQUE KEY id(id)
+					);";
+			$rs = $wpdb->query($sql);
 	}
 
 	$meta_table_name = $table_prefix.DBOXLITE_SLIDER_META;
@@ -149,7 +152,7 @@ function install_dboxlite_slider() {
 	$dboxlite_slider_options='dbox_slider_options';
 	$dboxlite_slider_curr=get_option($dboxlite_slider_options);
 	   				 
-	if(!$dboxlite_slider_curr) {
+	if(!isset($dboxlite_slider_curr)) {
 	 $dboxlite_slider_curr = array();
 	}
 
@@ -160,8 +163,20 @@ function install_dboxlite_slider() {
 	}
 	delete_option($dboxlite_slider_options);	  
 	update_option($dboxlite_slider_options,$dboxlite_slider_curr);  
+	update_option( "dboxlite_db_version", $dboxlite_db_version );
+
+	}//end of if db version chnage
 }
 register_activation_hook( __FILE__, 'install_dboxlite_slider' );
+/* Added for auto update - start */
+function dboxlite_update_db_check() {
+    global $dboxlite_db_version;
+    if (get_option('dboxlite_db_version') != $dboxlite_db_version) {
+        install_dboxlite_slider();
+    }
+}
+add_action('plugins_loaded', 'dboxlite_update_db_check');
+/* Added for auto update - end */
 require_once (dirname (__FILE__) . '/includes/dboxlite-slider-functions.php');
 require_once (dirname (__FILE__) . '/includes/sslider-get-the-image-functions.php');
 
@@ -231,7 +246,7 @@ global $dboxlite_slider;
 	  update_post_meta($post_id, '_dbox_slider_style', $_POST['_dbox_slider_style']);	
 	}
 	
-	$thumbnail_key = (isset($dboxlite_slider['img_pick'][1]) ? $dboxlite_slider['img_pick'][1] : 'slider_thumbnail');
+	$thumbnail_key = (isset($dboxlite_slider['img_pick'][1]) ? $dboxlite_slider['img_pick'][1] : 'dboxliteslider_thumbnail');
 	$dboxlite_sslider_thumbnail = get_post_meta($post_id,$thumbnail_key,true);
 	$post_slider_thumbnail=$_POST['dboxlite_sslider_thumbnail'];
 	if($dboxlite_sslider_thumbnail != $post_slider_thumbnail) {
@@ -369,9 +384,35 @@ function dboxlite_add_to_slider_checkbox() {
 		}
 		
 		$sliders = dboxlite_ss_get_sliders();
+		
 ?>
-		<div class="slider_checkbox">
-		<table class="form-table">
+				<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			jQuery("#dboxlite_basic").css({"background":"#222222","color":"#ffffff"});
+			jQuery("#dboxlite_basic").on("click", function(){ 
+				jQuery("#dboxlite_basic_tab").fadeIn("fast");
+				jQuery("#dboxlite_advaced_tab").fadeOut("fast");
+				jQuery(this).css({"background":"#222222","color":"#ffffff"});
+				jQuery("#dboxlite_advanced").css({"background":"buttonface","color":"#222222"});
+			});
+			jQuery("#dboxlite_advanced").on("click", function(){
+				jQuery("#dboxlite_basic_tab").fadeOut("fast");
+				jQuery("#dboxlite_advaced_tab").fadeIn("fast");
+				jQuery(this).css({"background":"#222222","color":"#ffffff"});
+				jQuery("#dboxlite_basic").css({"background":"buttonface","color":"#222222"});
+				
+			});
+		}); 
+		</script>
+		
+		<div style="border-bottom: 1px solid #ccc;padding-bottom: 0;padding-left: 10px;">
+		<button type="button" id="dboxlite_basic" style="padding:5px 30px 5px 30px;margin: 0;cursor:pointer;border:0;outline:none;">Basic</button>
+		<button type="button" id="dboxlite_advanced" style="padding:5px 30px 5px 30px;margin:0 0 0 10px;cursor:pointer;border:0;outline:none">Advanced</button>
+		</div>
+		
+		<div id="dboxlite_basic_tab">	
+			<div class="slider_checkbox">
+			<table class="form-table">
 				
 				<tr valign="top">
 				<th scope="row"><input type="checkbox" class="sldr_post" name="dboxlite-slider" value="dboxlite-slider" <?php echo $extra;?> />
@@ -384,29 +425,48 @@ function dboxlite_add_to_slider_checkbox() {
 				<input type="hidden" name="dboxlite-sldr-verify" id="dboxlite-sldr-verify" value="<?php echo wp_create_nonce('DboxLiteSlider');?>" />
 				</td>
 				</tr>
-                
-         <?php if($dboxlite_slider['multiple_sliders'] == '1') {?>
-                <tr valign="top">
-				<th scope="row">				
-				<label for="dboxlite_display_slider"><?php _e('Display ','dboxlite-slider'); ?></label>
-				<select name="dboxlite_display_slider_name">
-                <?php foreach ($sliders as $slider) { ?>
-                  <option value="<?php echo $slider['slider_id'];?>" <?php if(dboxlite_ss_post_on_slider($post_id,$slider['slider_id'])){echo 'selected';} ?>><?php echo $slider['slider_name'];?></option>
-                <?php } ?>
-                </select> 
-				<?php _e('on this Post/Page','dboxlite-slider'); ?></th>
-				<td><input type="checkbox" class="sldr_post" name="dboxlite_display_slider" value="1" <?php if(dboxlite_ss_slider_on_this_post($post_id)){echo "checked";}?> /> 
-				<?php _e('(Add the ','dboxlite-slider'); ?><a href="http://guides.slidervilla.com/dboxlite-slider/template-tags/simple-template-tag/" target="_blank"><?php _e('DboxLite Slider template tag','dboxlite-slider'); ?></a> <?php _e('manually on your page.php/single.php or another page template file)','dboxlite-slider'); ?></td>
-				</tr>
-          <?php } ?>
-	    </div>
-        <div>
+		
+         
+	    
         <?php
         $dboxlite_slider_style = get_post_meta($post->ID,'_dbox_slider_style',true);
         ?>
-         <tr valign="top">
+
+	
+	
+        
+  <?php         $thumbnail_key = (isset($dboxlite_slider['img_pick'][1]) ? $dboxlite_slider['img_pick'][1] : 'dboxliteslider_thumbnail');
+                $dboxlite_sslider_thumbnail= get_post_meta($post_id, $thumbnail_key, true); 
+		$dbox_sslider_nolink=get_post_meta($post_id, 'dbox_sslider_nolink', true);
+		$dbox_link_attr=get_post_meta($post_id, 'dbox_link_attr', true);
+		$dboxlite_youtubeurl=get_post_meta($post_id, '_dbox_youtubeurl', true);
+                $dboxlite_mp4url=get_post_meta($post_id, '_dbox_mp4url', true);
+                $dboxlite_webmurl=get_post_meta($post_id, '_dbox_webmurl', true);
+                $dboxlite_oggurl=get_post_meta($post_id, '_dbox_oggurl', true);
+		$dboxlite_video_shortcode=get_post_meta($post_id, '_dbox_video_shortcode', true);
+  ?>
+			
+				<div class="slider_checkbox">
+				<table class="form-table">
+				<tr valign="top">
+				<th scope="row"><label for="dboxlite_sslider_thumbnail"><?php _e('Custom Thumbnail Image(url)','dboxlite-slider'); ?></label></th>
+                <td><input type="text" name="dboxlite_sslider_thumbnail" class="dboxlite_sslider_thumbnail" value="<?php echo $dboxlite_sslider_thumbnail;?>" size="50" style="width:90%;" /></td>
+				</tr>
+
+				<tr valign="top">
+				<th scope="row"><label for="dboxlite_sslider_nolink"><?php _e('Do not link this slide to any page(url)','dboxlite-slider'); ?> </label></th>
+				<td><input type="checkbox" name="dboxlite_sslider_nolink" class="dboxlite_sslider_nolink" value="1" <?php if($dbox_sslider_nolink=='1'){echo "checked";}?>  /></td>
+				</tr>
+
+				</table>
+			</div>
+		</div>
+		<div id="dboxlite_advaced_tab" style="display:none;">
+			<div class="slider_checkbox">
+			<table class="form-table">
+		         	<tr valign="top">
 		 <th scope="row"><label for="_dbox_slider_style"><?php _e('Stylesheet to use if slider is displayed on this Post/Page','dboxlite-slider'); ?> </label></th>
-		 <td><select name="_dbox_slider_style" >
+		 	<td><select name="_dbox_slider_style" >
 			<?php 
             $directory = DBOXLITE_SLIDER_CSS_DIR;
             if ($handle = opendir($directory)) {
@@ -419,33 +479,11 @@ function dboxlite_add_to_slider_checkbox() {
             ?>
         </select></td>
 		</tr>
-        
-  <?php         $thumbnail_key = (isset($dboxlite_slider['img_pick'][1]) ? $dboxlite_slider['img_pick'][1] : 'slider_thumbnail');
-                $dboxlite_sslider_thumbnail= get_post_meta($post_id, $thumbnail_key, true); 
-		$dbox_sslider_nolink=get_post_meta($post_id, 'dbox_sslider_nolink', true);
-		$dbox_link_attr=get_post_meta($post_id, 'dbox_link_attr', true);
-		$dboxlite_youtubeurl=get_post_meta($post_id, '_dbox_youtubeurl', true);
-                $dboxlite_mp4url=get_post_meta($post_id, '_dbox_mp4url', true);
-                $dboxlite_webmurl=get_post_meta($post_id, '_dbox_webmurl', true);
-                $dboxlite_oggurl=get_post_meta($post_id, '_dbox_oggurl', true);
-		$dboxlite_video_shortcode=get_post_meta($post_id, '_dbox_video_shortcode', true);
-  ?>
-				<tr valign="top">
-				<th scope="row"><label for="dboxlite_sslider_thumbnail"><?php _e('Custom Thumbnail Image(url)','dboxlite-slider'); ?></label></th>
-                <td><input type="text" name="dboxlite_sslider_thumbnail" class="dboxlite_sslider_thumbnail" value="<?php echo $dboxlite_sslider_thumbnail;?>" size="50" style="width:90%;" /></td>
-				</tr>
-				
-				<tr valign="top">
+
+		<tr valign="top">
                 <th scope="row"><label for="dbox_link_attr"><?php _e('Slide Link (anchor) attributes ','dboxlite-slider'); ?></label></th>
                 <td><input type="text" name="dbox_link_attr" class="dbox_link_attr" value="<?php echo htmlentities( $dbox_link_attr, ENT_QUOTES);?>" size="50" style="width:90%;" /><br /><small><?php _e('e.g. target="_blank" rel="external nofollow"','dboxlite-slider'); ?></small></td>
-				</tr>
-				
-						
-                <tr valign="top">
-				<th scope="row"><label for="dbox_sslider_nolink"><?php _e('Do not link this slide to any page(url)','dboxlite-slider'); ?> </label></th>
-                <td><input type="checkbox" name="dbox_sslider_nolink" class="dbox_sslider_nolink" value="1" <?php if($dbox_sslider_nolink=='1'){echo "checked";}?>  /></td>
-				</tr>
-
+		</tr>
 <!-- Added for video - Start -->
 	<tr valign="top">
 	<th scope="row"><label for="video"><?php _e('Video URL','dboxlite-slider'); ?> </label><br><br><div style="font-weight:normal;border:1px dashed #ccc;padding:5px;color:#666;line-height:20px;font-size:13px;">webm video, ogg video are the fallback URL used for specific browsers. You can mention your self hosted videos over here.</div></th>
@@ -487,8 +525,8 @@ function dboxlite_add_to_slider_checkbox() {
 <!-- Added for video - End -->
 				</table>
 
-				
-                 </div>
+				</div>     
+			</div>
 <?php }
 }
 
@@ -626,4 +664,5 @@ if( $dboxlite_slider['custom_post'] == '1' and !post_type_exists('slidervilla') 
 require_once (dirname (__FILE__) . '/includes/media-images.php');
 require_once (dirname (__FILE__) . '/slider_versions/dboxlite_1.php');
 require_once (dirname (__FILE__) . '/settings/settings.php');
+
 ?>

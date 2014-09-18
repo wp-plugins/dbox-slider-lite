@@ -1,5 +1,5 @@
 /* basic styles */
-.dboxlite_slider_fouc .dboxlite_slider {display: none;} /* Keep this as it is*/
+/*.dboxlite_slider_fouc .dboxlite_slider {display: none;} */     /* Keep this as it is*/
 .dboxlite_slider div,.dboxlite_slider p,.dboxlite_slider li,.dboxlite_slider span,.dboxlite_slider img,.dboxlite_slider h2,.dboxlite_slider ul{list-style:none;vertical-align:baseline;margin: 0;padding:0;}
 /* Slider Container */
 .dboxlite_slider{margin: 0 0 0 0;line-height:18px;position: relative;z-index: 10;width:100%;outline:none;}
@@ -112,7 +112,18 @@ text-indent: -9000px;cursor: pointer;border-radius: 50%;z-index: 100;opacity: 1;
 	.dboxlite_slider .dboxlite_shadow {height:100px;margin-top:-50px;}
 }
 
-
 /************************************************************************************************/
 /*Add Generated CSS from Settings admin panel below and then change/add necessary CSS properties*/
 /************************************************************************************************/
+.dboxlite_slider_set{max-width:640px;max-height:460px;height:100%;} 
+.dboxlite_slider_set .dboxlite_text{background-color:#ffffff;opacity:0.8;-ms-filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=80)';filter: alpha(opacity=80);background-position: initial initial; background-repeat: initial initial;} 
+.dboxlite_slider_set .dboxlite_slider_thumbnail{width:640px;position: relative;max-height:400px;} 
+.dboxlite_slider_set .dboxlite_text h2{clear:none;line-height:19px;font-family: Trebuchet MS,sans-serif, Arial, Helvetica, sans-serif;font-size:14px;font-weight:bold;font-style:normal;color:#222222;} 
+.dboxlite_slider_set .dboxlite_text h2 a{font-family: Trebuchet MS,sans-serif;font-size:14px;font-weight:bold;font-style:normal;color:#222222;} 
+.dboxlite_slider_set .dboxlite-content-span{font-family: Arial,Helvetica,sans-serif, Arial, Helvetica, sans-serif;font-size:12px;font-weight:normal;font-style:normal;color:#000000;} 
+.dboxlite_slider_set .dboxlite_next{background: #666666 url(http://localhost/wordpress/wp-content/plugins/dbox-slider-lite/css/skins/default/images/next.png)no-repeat;background-position: center center;width:42px;height:42px;background-size:32px;} 
+.dboxlite_slider_set .dboxlite_prev{background: #666666 url(http://localhost/wordpress/wp-content/plugins/dbox-slider-lite/css/skins/default/images/prev.png)no-repeat;background-position: center center;width:42px;height:42px;background-size:32px;} 
+.dboxlite_slider_set .dboxlite_nav_dots{height:30px;} 
+.dboxlite_slider_set .dboxlite_nav_options{width:32px;height:32px;} 
+.dboxlite_slider_set .dboxlite_play{background: #666666 url(http://localhost/wordpress/wp-content/plugins/dbox-slider-lite/css/skins/default/images/play.png)no-repeat;background-position: center center;width:30px;height:30px;background-size:16px;} 
+.dboxlite_slider_set .dboxlite_pause{background: #666666 url(http://localhost/wordpress/wp-content/plugins/dbox-slider-lite/css/skins/default/images/pause.png)no-repeat;background-position: center center;width:30px;height:30px;background-size:16px;}

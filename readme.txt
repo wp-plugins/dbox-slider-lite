@@ -1,10 +1,10 @@
-=== Dbox Slider Lite ===
+=== Dbox 3D Slider Lite ===
 Contributors: slidervilla
 Tags: 3d slider, best 3d slider, jquery slider, responsive, responsive 3d slider
 Donate link: http://www.clickonf5.org/go/donate-wp-plugins/ 
 Requires at least: 3.5
-Tested up to: 3.9.1
-Stable tag: 1.0
+Tested up to: 4.0
+Stable tag: 1.1
 License: GPLv2 or later
 
 Embed 3D Responsive Slider of Media Library Images, Recent Posts, Category Posts, Custom Post Type
@@ -106,6 +106,20 @@ FAQ section on: http://guides.slidervilla.com/dboxlite-slider/
 None
 
 == Changelog ==
+
+* 1.1 (09/18/2014)
+
+1.	Fix: In case of multisite wordpress installation there was an issue while saving setting set..
+2.	New: Form validations for admin side settings.
+3.	New: Image uploader for Sliders on ‘Sliders’ settings panel. No need to add individual media image to dbox slider.
+4.	New: On settings panel of Dbox slider now it is possible to expand and collapse tabs which greatly reduces scrolling efforts.
+5.	New: Preview Slider params simplified on Settings panel.
+6.	Fix: Solved the issues with responsiveness of admin panel settings page and sliders page.
+7.	Fix: Changed the media-uploader.js, resolved issue with browser compatibility while editing uploaded images to the slider
+8.	New: Color picker changed from Farbtastic to “wp-color-picker”.
+9.	New: Flashcard Slider post meta box now has two tabs named basic and advanced with respective fields for the purpose of easy understanding and saving the space.
+10.	Fix: Changed the media-uploader.js, resolved issue with browser compatibility while editing uploaded images to the slider
+11.	New: Introduced new sample skin
 
 = 1.0 =
 * Hello World. :-)	

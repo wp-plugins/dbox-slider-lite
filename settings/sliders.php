@@ -71,7 +71,31 @@ if ((isset ($_POST['rename_slider'])) and ($_POST['rename_slider'] == __('Rename
 		$wpdb->query($sql);
 	}
 }
-
+if ( isset($_POST['addSave']) and ($_POST['addSave']=='Save') ) {
+	$images=(isset($_POST['imgID']))?$_POST['imgID']:array();
+	$slider_id=$_POST['current_slider_id'];
+	$ids=array_reverse($images);
+	global $wpdb,$table_prefix;
+	foreach($ids as $id){
+		$title=(isset($_POST['title'][$id]))?$_POST['title'][$id]:'';
+		$desc=(isset($_POST['desc'][$id]))?$_POST['desc'][$id]:'';
+		$link=(isset($_POST['link'][$id]))?$_POST['link'][$id]:'';
+		$nolink=(isset($_POST['nolink'][$id]))?$_POST['nolink'][$id]:'';
+		$attachment = array(
+			'ID'           => $id,
+			'post_title'   => $title,
+			'post_content' => $desc
+		);
+		wp_update_post( $attachment );
+		update_post_meta($id, 'dboxlite_slide_redirect_url', $link);
+		update_post_meta($id, 'dboxlite_sslider_nolink', $nolink);
+		if(!dboxlite_slider($id,$slider_id)) {
+				$dt = date('Y-m-d H:i:s');
+				$sql = "INSERT INTO ".$table_prefix.DBOXLITE_SLIDER_TABLE." (post_id, date, slider_id) VALUES ('$id', '$dt', '$slider_id')";
+				$wpdb->query($sql);
+		}
+	}
+}
 ?>
 <h2 class="top_heading"><span><?php _e('Sliders Created','dboxlite-slider'); ?></span></h2>
 <div style="clear:left"></div>
@@ -85,14 +109,34 @@ if ((isset ($_POST['rename_slider'])) and ($_POST['rename_slider'] == __('Rename
         <?php foreach($sliders as $slider){?>
             <li class="yellow"><a href="#tabs-<?php echo $slider['slider_id'];?>"><?php echo $slider['slider_name'];?></a></li>
         <?php } ?>
+	
         </ul>
 
 <?php foreach($sliders as $slider){?>
 <div id="tabs-<?php echo $slider['slider_id'];?>">
 <strong>Quick Embed Shortcode:</strong>
 <div class="admin_shortcode">
-<pre style="padding: 10px 0;">[dboxliteslider]</pre>
+<pre style="padding: 10px 0;">[dboxslider]</pre>
 </div>
+
+<!-- Add bulk images start v1.1-->
+<?php 
+if ( ! did_action( 'wp_enqueue_media' ) ) wp_enqueue_media();
+wp_enqueue_script( 'media-uploader', dboxlite_slider_plugin_url( 'js/media-uploader.js' ),array( 'jquery', 'iris' ), DBOXLITE_SLIDER_VER, false);
+?>
+	<h3 class="sub-heading" style="margin-left:0px;"><?php _e('Add Images to','dboxlite-slider'); ?> <?php echo $slider['slider_name'];?> (Slider ID = <?php echo $slider['slider_id'];?>)</h3>
+
+	<div class="uploaded-images">
+		<form method="post" class="addImgForm">
+			<div style="clear:left;margin-top:10px;" class="image-uploader">
+				<input type="submit" class="upload-button slider_images_upload" name="slider_images_upload" value="Upload" />
+			</div>
+			<input type="hidden" name="current_slider_id" value="<?php echo $slider['slider_id'];?>" />
+			<input type="hidden" name="active_tab" class="dboxlite_activetab" value="0" />
+		</form>
+	</div>
+<!-- Add bulk images end v1.1-->
+
 <form action="" method="post">
 <?php settings_fields('dboxlite-slider-group'); ?>
 

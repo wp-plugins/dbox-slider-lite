@@ -181,6 +181,9 @@
 	jQuery.DboxLite.defaults = {
 		// (v)ertical, (h)orizontal or (r)andom
 		orientation : 'v',
+		//Max width and height of the slider
+		width : '640',
+		height : '460',
 		// perspective value
 		perspective : 1200,
 		// number of slices / cuboids
@@ -265,7 +268,7 @@
 				else self.realWidth = i.width;
 				self.$items.find('img.dboxlite_slider_thumbnail').width(self.realWidth);
 
-				self.$el.parent().find('.dboxlite_shadow').width(self.realWidth);
+				self.$el.parent().find('.dboxlite_shadow').css("max-width",self.realWidth);
 
 				// assuming all images with same size
 				self._setSize();
@@ -333,13 +336,18 @@
 		},
 		_setSize : function() {
 
-			var $visible = this.$items.eq( this.current ).find( 'img.dboxlite_slider_thumbnail' );
+			var $visible = this.$items.eq( this.current );
 
+			var h,factor;
+			factor=($visible.width())/this.options.width;
+			h=factor*(this.options.height-60);
+			
 			this.size = {
 				width	: $visible.width(),
-				height	: $visible.height()
+				height	: h
 			};
-			
+			this.$items.height(h);
+			this.$items.find('img').height(h);
 		},
 		_setStyle : function() {
 
@@ -1128,3 +1136,4 @@ function dboxlite_slider_init(args) {
 
 		return { init : init };
 };
+

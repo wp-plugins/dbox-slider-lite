@@ -18,20 +18,48 @@ $scounter='';
 $cntr = '';
 
 $new_settings_msg='';
+/* Include settings file of each skin - strat v1.1*/
+$directory = DBOXLITE_SLIDER_CSS_DIR;
+if ($handle = opendir($directory)) {
+    while (false !== ($file = readdir($handle))) { 
+     if($file != '.' and $file != '..') { 
+     	if($file!='sample')
+		require_once ( dirname( dirname(__FILE__) ) . '/css/skins/'.$file.'/settings.php');
+   } }
+    closedir($handle);
+}
 
-//Reset Settings
-if (isset ($_POST['dboxlite_reset_settings_submit'])) {
+/* Include settings file of each skin- end v1.1*/
+//Reset Settings added for v1.1 start
+ if (isset ($_POST['dboxlite_reset_settings_submit'])) {
 	if ( $_POST['dboxlite_reset_settings']!='n' ) {
 	  $dboxlite_reset_settings=$_POST['dboxlite_reset_settings'];
 	  $options='dbox_slider_options';
 	  $optionsvalue=get_option($options);
+	  if( $dboxlite_reset_settings == 'g' ){
 		$new_settings_value=$default_dboxlite_slider_settings;
-	$new_settings_value['setname']=$optionsvalue['setname'];
-	update_option($options,$new_settings_value);
+		//$new_settings_value['setname']=$optionsvalue['setname'];
+		update_option($options,$new_settings_value);
+	  }
+	   elseif(!is_numeric($dboxlite_reset_settings)){
+		$skin=$dboxlite_reset_settings;
+		$new_settings_value=$default_dboxlite_slider_settings;
+		$skin_defaults_str='default_settings_'.$skin;
+		global ${$skin_defaults_str};
+		if(count(${$skin_defaults_str})>0){
+			foreach(${$skin_defaults_str} as $key=>$value){
+				$new_settings_value[$key]=$value;	
+			}
+			$new_settings_value['stylesheet']=$skin;
+		}
+		$new_settings_value['setname']=$optionsvalue['setname'];		
+		update_option($options,$new_settings_value);
+	  }
 	}
 }
+//Reset Settings added for v1.1 end 
 
-
+ 
 $group='dboxlite-slider-group';
 $dboxlite_slider_options='dbox_slider_options';
 $dboxlite_slider_curr=get_option($dboxlite_slider_options);
@@ -89,13 +117,31 @@ else{?>
         </ul>
 
 <div id="basic">
-<div class="sub_settings">
+<div class="sub_settings toggle_settings">
 <h2 class="sub-heading">
-<?php _e('Basic Settings','dboxlite-slider'); ?></h2> 
+<?php _e('Basic Settings','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('A set of very basic settings/options','dboxlite-slider'); ?></p> 
 
 <table class="form-table">
 
+<!-- Added for skin start v1.1 -->
+<tr valign="top">
+<th scope="row"><?php _e('Skin','dboxlite-slider'); ?></th>
+<td><select name="<?php echo $dboxlite_slider_options;?>[stylesheet]" id="dboxlite_stylesheet" onchange="return checkskin(this.value);">
+<?php 
+$directory = DBOXLITE_SLIDER_CSS_DIR;
+if ($handle = opendir($directory)) {
+    while (false !== ($file = readdir($handle))) { 
+     if($file != '.' and $file != '..') { ?>
+	 <option value="<?php echo $file;?>" <?php if ($dboxlite_slider_curr['stylesheet'] == $file){ echo "selected";}?> ><?php echo $file;?></option>
+ <?php  } }
+    closedir($handle);
+}
+?>
+</select>
+</td>
+</tr>
+<!-- Added for skin end v1.1 -->
 <tr valign="top">
 <th scope="row"><?php _e('Direction of Rotation','dboxlite-slider'); ?></th>
 <td><select name="<?php echo $dboxlite_slider_options;?>[direction_rotation]" >
@@ -107,7 +153,7 @@ else{?>
 
 <tr valign="top">
 <th scope="row"><?php _e('Speed','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[speed]" id="dboxlite_slider_speed" class="small-text" value="<?php echo $dboxlite_slider_curr['speed']; ?>" /></td>
+<td><input type="number" min="1" name="<?php echo $dboxlite_slider_options;?>[speed]" id="dboxlite_slider_speed" class="small-text" value="<?php echo $dboxlite_slider_curr['speed']; ?>" /></td>
 </tr>
 
 <tr valign="top">
@@ -118,13 +164,13 @@ else{?>
 
 <tr valign="top">
 <th scope="row"><?php _e('Time between Transition','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[interval]" id="dboxlite_slider_time" class="small-text" value="<?php echo $dboxlite_slider_curr['interval']; ?>" />&nbsp;<?php _e('sec','dboxlite_slider');?>
+<td><input type="number" min="1" name="<?php echo $dboxlite_slider_options;?>[interval]" id="dboxlite_slider_time" class="small-text" value="<?php echo $dboxlite_slider_curr['interval']; ?>" />&nbsp;<?php _e('sec','dboxlite_slider');?>
 </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Max. Number of Posts in the DboxLite Slider','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[no_posts]" id="dboxlite_slider_no_posts" class="small-text" value="<?php echo $dboxlite_slider_curr['no_posts']; ?>" /></td>
+<td><input type="number" min="1" name="<?php echo $dboxlite_slider_options;?>[no_posts]" id="dboxlite_slider_no_posts" class="small-text" value="<?php echo $dboxlite_slider_curr['no_posts']; ?>" /></td>
 </tr>
 
 <tr valign="top">
@@ -143,12 +189,12 @@ else{?>
 
 <tr valign="top">
 <th scope="row"><?php _e('Max. Slider Width','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[width]" id="dboxlite_slider_width" class="small-text" value="<?php echo $dboxlite_slider_curr['width']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
+<td><input type="number" min="1" name="<?php echo $dboxlite_slider_options;?>[width]" id="dboxlite_slider_width" class="small-text" value="<?php echo $dboxlite_slider_curr['width']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Max. Slider Height','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[height]" id="dboxlite_slider_height" class="small-text" value="<?php echo $dboxlite_slider_curr['height']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
+<td><input type="number" min="1" name="<?php echo $dboxlite_slider_options;?>[height]" id="dboxlite_slider_height" class="small-text" value="<?php echo $dboxlite_slider_curr['height']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
 </tr>
 
 </table>
@@ -157,8 +203,8 @@ else{?>
 </p>
 </div>
 
-<div class="sub_settings_m">
-<h2 class="sub-heading"><?php _e('Miscellaneous','dboxlite-slider'); ?></h2> 
+<div class="sub_settings_m toggle_settings">
+<h2 class="sub-heading"><?php _e('Miscellaneous','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 
 <table class="form-table">
 
@@ -222,30 +268,9 @@ else{?>
 <td><input type="text" name="<?php echo $dboxlite_slider_options;?>[noscript]" class="regular-text code" value="<?php echo $dboxlite_slider_curr['noscript']; ?>" /></td>
 </tr>
 
-<tr valign="top">
-<th scope="row"><?php _e('DboxLite Slider Styles to Use on Other than Post/Pages','dboxlite-slider'); ?> <small><?php _e('(i.e. for index.php,category.php,archive.php etc)','dboxlite-slider'); ?></small></th>
-<td><select name="<?php echo $dboxlite_slider_options;?>[stylesheet]" >
-<?php 
-$directory = DBOXLITE_SLIDER_CSS_DIR;
-if ($handle = opendir($directory)) {
-    while (false !== ($file = readdir($handle))) { 
-     if($file != '.' and $file != '..') { ?>
-      <option value="<?php echo $file;?>" <?php if ($dboxlite_slider_curr['stylesheet'] == $file){ echo "selected";}?> ><?php echo $file;?></option>
- <?php  } }
-    closedir($handle);
-}
-?>
-</select>
-</td>
 <?php } ?>
 
 <?php if(!isset($cntr) or empty($cntr)){?>
-<tr valign="top">
-<th scope="row"><?php _e('Multiple Slider Feature','dboxlite-slider'); ?></th>
-<td><label for="dboxlite_slider_multiple"> 
-<input name="<?php echo $dboxlite_slider_options;?>[multiple_sliders]" type="checkbox" id="dboxlite_slider_multiple" value="1" <?php checked("1", $dboxlite_slider_curr['multiple_sliders']); ?> /> 
- <?php _e('Enable Multiple Slider Function on Edit Post/Page','dboxlite-slider'); ?></label></td>
-</tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Create "SliderVilla Slides" Custom Post Type','dboxlite-slider'); ?></th>
@@ -280,7 +305,7 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </td>
 </tr>
 
-<?php } ?>
+<?php } ?> 
 
 <tr valign="top">
 <th scope="row"><?php _e('Enable FOUC','dboxlite-slider'); ?></th>
@@ -317,10 +342,17 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 
 <div id="slides">
 
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('Slide Image','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('Slide Image','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Customize the looks of the Slide Image','dboxlite-slider'); ?></p> 
 <table class="form-table">
+
+<?php 
+$dboxlite_slider_curr['img_pick'][0]=(isset($dboxlite_slider_curr['img_pick'][0]))?$dboxlite_slider_curr['img_pick'][0]:'';
+$dboxlite_slider_curr['img_pick'][2]=(isset($dboxlite_slider_curr['img_pick'][2]))?$dboxlite_slider_curr['img_pick'][2]:'';
+$dboxlite_slider_curr['img_pick'][3]=(isset($dboxlite_slider_curr['img_pick'][3]))?$dboxlite_slider_curr['img_pick'][3]:'';
+$dboxlite_slider_curr['img_pick'][5]=(isset($dboxlite_slider_curr['img_pick'][5]))?$dboxlite_slider_curr['img_pick'][5]:'';
+?>
 
 <tr valign="top"> 
 <th scope="row"><?php _e('Image Pick Preferences','dboxlite-slider'); ?> <small><?php _e('(The first one is having priority over second, the second having priority on third and so on)','dboxlite-slider'); ?></small></th> 
@@ -404,8 +436,8 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </p>
 </div>
 
-<div class="sub_settings_m">
-<h2 class="sub-heading"><?php _e('Slide/Post Title','dboxlite-slider'); ?></h2> 
+<div class="sub_settings_m toggle_settings">
+<h2 class="sub-heading"><?php _e('Slide/Post Title','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Customize the looks of the title of each of the sliding post here','dboxlite-slider'); ?></p> 
 <table class="form-table">
 
@@ -458,12 +490,12 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 
 <tr valign="top">
 <th scope="row"><?php _e('Font Color','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[ptitle_fcolor]" id="color_value_3" value="<?php echo $dboxlite_slider_curr['ptitle_fcolor']; ?>" />&nbsp; <img id="color_picker_3" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_3"></div></td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[ptitle_fcolor]" id="dboxlite_slider_ptitle_fcolor" value="<?php echo $dboxlite_slider_curr['ptitle_fcolor']; ?>" class="wp-color-picker-field" data-default-color="#3F4C6B" /></td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Font Size','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[ptitle_fsize]" id="dboxlite_slider_ptitle_fsize" class="small-text" value="<?php echo $dboxlite_slider_curr['ptitle_fsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[ptitle_fsize]" id="dboxlite_slider_ptitle_fsize" class="small-text" value="<?php echo $dboxlite_slider_curr['ptitle_fsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
 </tr>
 
 <tr valign="top">
@@ -482,8 +514,8 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </p>
 </div>
 
-<div class="sub_settings_m">
-<h2 class="sub-heading"><?php _e('Slide Content','dboxlite-slider'); ?></h2> 
+<div class="sub_settings_m toggle_settings">
+<h2 class="sub-heading"><?php _e('Slide Content','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Customize the looks of the content of each of the sliding post here','dboxlite-slider'); ?></p> 
 <table class="form-table">
 
@@ -545,12 +577,12 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 
 <tr valign="top">
 <th scope="row"><?php _e('Font Color','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[content_fcolor]" id="color_value_5" value="<?php echo $dboxlite_slider_curr['content_fcolor']; ?>" />&nbsp; <img id="color_picker_5" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_5"></div></td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[content_fcolor]" id="dboxlite_slider_ptitle_fcolor" value="<?php echo $dboxlite_slider_curr['content_fcolor']; ?>" class="wp-color-picker-field" data-default-color="#3F4C6B" /></td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Font Size','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[content_fsize]" id="dboxlite_slider_content_fsize" class="small-text" value="<?php echo $dboxlite_slider_curr['content_fsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[content_fsize]" id="dboxlite_slider_content_fsize" class="small-text" value="<?php echo $dboxlite_slider_curr['content_fsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?></td>
 </tr>
 
 <tr valign="top">
@@ -576,7 +608,7 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 
 <tr valign="top">
 <th scope="row"><?php _e('Maximum content size (in words)','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[content_limit]" id="dboxlite_slider_content_limit" class="small-text" value="<?php echo $dboxlite_slider_curr['content_limit']; ?>" />
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[content_limit]" id="dboxlite_slider_content_limit" class="small-text" value="<?php echo $dboxlite_slider_curr['content_limit']; ?>" />
 <span class="moreInfo">
 	&nbsp; <span class="trigger"> ? </span>
 	<div class="tooltip">
@@ -588,18 +620,18 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 
 <tr valign="top">
 <th scope="row"><?php _e('Maximum content size (in characters)','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[content_chars]" id="dboxlite_slider_content_chars" class="small-text" value="<?php echo $dboxlite_slider_curr['content_chars']; ?>" />&nbsp;<?php _e('characters','dboxlite-slider'); ?></td>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[content_chars]" id="dboxlite_slider_content_chars" class="small-text" value="<?php echo $dboxlite_slider_curr['content_chars']; ?>" />&nbsp;<?php _e('characters','dboxlite-slider'); ?></td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Content Background Color','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[bg_color]" id="color_value_1" value="<?php echo $dboxlite_slider_curr['bg_color']; ?>" />&nbsp; <img id="color_picker_1" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_1"></div> <br />
-<label for="dboxlite_slider_bg"><input name="<?php echo $dboxlite_slider_options;?>[bg]" type="checkbox" id="dboxlite_slider_bg" value="1" <?php checked('1', $dboxlite_slider_curr['bg']); ?>  /><?php _e(' Use Transparent Background','dboxlite-slider'); ?></label> </td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[bg_color]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['bg_color']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+<label for="dboxlite_slider_bg"><input name="<?php echo $dbox_slider_options;?>[bg]" type="checkbox" id="dbox_slider_bg" value="1" <?php checked('1', $dbox_slider_curr['bg']); ?>  /><?php _e(' Use Transparent Background','dbox-slider'); ?></label> </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Content Background Opacity','dboxlite-slider'); ?></th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[bg_opacity]" id="dboxlite_slider_bg_opacity" class="small-text" value="<?php echo $dboxlite_slider_curr['bg_opacity']; ?>" /></td>
+<td><input type="number" min="0" max="1" step="0.01" name="<?php echo $dboxlite_slider_options;?>[bg_opacity]" id="dboxlite_slider_bg_opacity" class="small-text" value="<?php echo $dboxlite_slider_curr['bg_opacity']; ?>" /></td>
 </tr>
 
 </table>
@@ -611,27 +643,27 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </div> <!--#slides-->
 
 <div id="slider_nav">
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('Navigation Buttons','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('Navigation Buttons','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 
 <table class="form-table">
 
 <tr valign="top">
 <th scope="row"><?php _e('Button Width','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[pn_width]" id="dboxlite_slider_pn_width" class="small-text" value="<?php echo $dboxlite_slider_curr['pn_width']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[pn_width]" id="dboxlite_slider_pn_width" class="small-text" value="<?php echo $dboxlite_slider_curr['pn_width']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
 </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Background Color','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navarr_bgcolor]" id="color_value_2" value="<?php echo $dboxlite_slider_curr['navarr_bgcolor']; ?>" />&nbsp; <img id="color_picker_2" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_2">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navarr_bgcolor]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['navarr_bgcolor']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Background Color on Hover','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navarr_bgcolor_hover]" id="color_value_4" value="<?php echo $dboxlite_slider_curr['navarr_bgcolor_hover']; ?>" />&nbsp; <img id="color_picker_4" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_4">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navarr_bgcolor_hover]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['navarr_bgcolor_hover']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 
@@ -642,26 +674,26 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </p>
 </div>
 
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('Navigation Dots','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('Navigation Dots','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 
 <table class="form-table">
 
 <tr valign="top">
 <th scope="row"><?php _e('Background Color','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navdot_color]" id="color_value_7" value="<?php echo $dboxlite_slider_curr['navdot_color']; ?>" />&nbsp; <img id="color_picker_7" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_7">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[navdot_color]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['navdot_color']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Fill Color of Current Dot','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[currnavdot_color]" id="color_value_12" value="<?php echo $dboxlite_slider_curr['currnavdot_color']; ?>" />&nbsp; <img id="color_picker_12" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_12">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[currnavdot_color]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['currnavdot_color']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Size','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[dotsize]" class="small-text" value="<?php echo $dboxlite_slider_curr['dotsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[dotsize]" class="small-text" value="<?php echo $dboxlite_slider_curr['dotsize']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
 </td>
 </tr>
 
@@ -672,26 +704,26 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </p>
 </div>
 
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('Navigation Play/Pause','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('Navigation Play/Pause','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 
 <table class="form-table">
 
 <tr valign="top">
 <th scope="row"><?php _e('Background Color','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[playbt_color]" id="color_value_10" value="<?php echo $dboxlite_slider_curr['playbt_color']; ?>" />&nbsp; <img id="color_picker_10" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_10">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[playbt_color]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['playbt_color']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Background Color on Hover','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[playbt_color_hover]" id="color_value_11" value="<?php echo $dboxlite_slider_curr['playbt_color_hover']; ?>" />&nbsp; <img id="color_picker_11" src="<?php echo dboxlite_slider_plugin_url( 'images/color_picker.png' ); ?>" alt="<?php _e('Pick the color of your choice','dboxlite-slider'); ?>" /><div class="color-picker-wrap" id="colorbox_11">
-</td>
+<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[playbt_color_hover]" id="dboxlite_slider_bg_color" value="<?php echo $dboxlite_slider_curr['playbt_color_hover']; ?>" class="wp-color-picker-field" data-default-color="#ffffff" /></br></br>
+ </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('Size','dboxlite-slider'); ?> </th>
-<td><input type="text" name="<?php echo $dboxlite_slider_options;?>[playbt_size]" class="small-text" value="<?php echo $dboxlite_slider_curr['playbt_size']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
+<td><input type="number" min="0" name="<?php echo $dboxlite_slider_options;?>[playbt_size]" class="small-text" value="<?php echo $dboxlite_slider_curr['playbt_size']; ?>" />&nbsp;<?php _e('px','dboxlite-slider'); ?>
 </td>
 </tr>
 
@@ -705,8 +737,8 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </div> <!--#slider_nav-->
 
 <div id="preview">
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('Preview on Settings Panel','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('Preview on Settings Panel','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 
 <table class="form-table">
 
@@ -724,20 +756,46 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('DboxLite Template Tag for Preview','dboxlite-slider'); ?></th>
-<td><select name="<?php echo $dboxlite_slider_options;?>[preview]" id="dboxlite_slider_preview">
+<th scope="row"><?php _e('Type of Dbox Lite Slider','dboxlite-slider'); ?></th>
+<td><select name="<?php echo $dboxlite_slider_options;?>[preview]" id="dboxlite_slider_preview" onchange="checkpreview(this.value);">
 <option value="2" <?php if ($dboxlite_slider_curr['preview'] == "2"){ echo "selected";}?> ><?php _e('Recent Posts Slider','dboxlite-slider'); ?></option>
 <option value="1" <?php if ($dboxlite_slider_curr['preview'] == "1"){ echo "selected";}?> ><?php _e('Category Slider','dboxlite-slider'); ?></option>
 <option value="0" <?php if ($dboxlite_slider_curr['preview'] == "0"){ echo "selected";}?> ><?php _e('Custom Slider','dboxlite-slider'); ?></option>
 </select>
 </td>
 </tr>
+<?php 
+/* Added for category selection in Meta Box */
+//category slug
+$categories = get_categories();
+$scat_html='<option value="" selected >Select the Category</option>';
 
-<tr valign="top"> 
+foreach ($categories as $category) { 
+ if($category->slug==$dboxlite_slider_curr['catg_slug']){$selected = 'selected';} else{$selected='';}
+ $scat_html =$scat_html.'<option value="'.$category->slug.'" '.$selected.'>'. $category->name .'</option>';
+} 
+//slider names
+global $dboxlite_slider;
+           		$new_settings_value['setname']=isset($optionsvalue['setname'])?$optionsvalue['setname']:'Set';
+			$slider_id = $dboxlite_slider_curr['slider_id'];	
+			$sliders = dboxlite_ss_get_sliders();
+			$sname_html='<option value="0" selected >Select the Slider</option>';
+		  foreach ($sliders as $slider) { 
+			 if($slider['slider_id']==$slider_id){$selected = 'selected';} else{$selected='';}
+			 $sname_html =$sname_html.'<option value="'.$slider['slider_id'].'" '.$selected.'>'.$slider['slider_name'].'</option>';
+
+		}    
+?>
+
+<tr valign="top" class="dboxlite_slider_params"> 
 <th scope="row"><?php _e('Preview Slider Params','dboxlite-slider'); ?></th> 
 <td><fieldset><legend class="screen-reader-text"><span><?php _e('Preview Slider Params','dboxlite-slider'); ?></span></legend> 
-<label for="<?php echo $dboxlite_slider_options;?>[catg_slug]" style="width:45%;"><?php _e('Category Slug in case of Category Slider','dboxlite-slider'); ?></label>
-<input type="text" name="<?php echo $dboxlite_slider_options;?>[catg_slug]" id="dboxlite_slider_catslug" class="regular-text code" style="width:100px;" value="<?php echo $dboxlite_slider_curr['catg_slug']; ?>" style="width:45%;" /> 
+
+<label for="<?php echo $dboxlite_slider_options;?>[slider_id]" class="dboxlite_sid"><?php _e('Select Slider Name','dboxlite-slider'); ?></label>
+<select id="dboxlite_slider_id" name="<?php echo $dboxlite_slider_options;?>[slider_id]" class="dboxlite_sid"><?php echo $sname_html;?></select>
+
+<label for="<?php echo $dboxlite_slider_options;?>[catg_slug]" class="dboxlite_catslug"><?php _e('Select Category','dboxlite-slider'); ?></label>
+<select id="dboxlite_slider_catslug" name="<?php echo $dboxlite_slider_options;?>[catg_slug]" class="dboxlite_catslug"><?php echo $scat_html;?></select>
 </fieldset></td> 
 </tr> 
 
@@ -747,8 +805,8 @@ if(!isset($remove_post_type_arr) or !is_array($remove_post_type_arr) ) $remove_p
 </p>
 </div>
 
-<div class="sub_settings_m">
-<h2 class="sub-heading"><?php _e('Shortcode','dboxlite-slider'); ?></h2> 
+<div class="sub_settings_m toggle_settings">
+<h2 class="sub-heading"><?php _e('Shortcode','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Paste the below shortcode on Page/Post Edit Panel to get the slider as shown in the above Preview','dboxlite-slider'); ?></p><br />
 <?php if($cntr=='') $s_set='1'; else $s_set=$cntr;
 if ($dboxlite_slider_curr['preview'] == "0") 
@@ -757,12 +815,12 @@ elseif($dboxlite_slider_curr['preview'] == "1")
 	$preview='[dboxcategory catg_slug="'.$dboxlite_slider_curr['catg_slug'].'"]';
 else
 	$preview='[dboxrecent]';
-echo $preview;
+echo "<p>".$preview."</p>";
 ?>
 </div>
 
-<div class="sub_settings_m">
-<h2 class="sub-heading"><?php _e('Template Tag','dboxlite-slider'); ?></h2> 
+<div class="sub_settings_m toggle_settings">
+<h2 class="sub-heading"><?php _e('Template Tag','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Paste the below template tag in your theme template file like index.php or page.php at required location to get the slider as shown in the above Preview','dboxlite-slider'); ?></p><br />
 <?php 
 if ($dboxlite_slider_curr['preview'] == "0")
@@ -777,11 +835,11 @@ else
 </div><!-- preview tab ends-->
 
 <div id="cssvalues">
-<div class="sub_settings">
-<h2 class="sub-heading"><?php _e('CSS Generated thru these settings','dboxlite-slider'); ?></h2> 
+<div class="sub_settings toggle_settings">
+<h2 class="sub-heading"><?php _e('CSS Generated thru these settings','dboxlite-slider'); ?><img src="<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>" class="toggle_img"></h2> 
 <p><?php _e('Save Changes for the settings first and then view this data. You can use this CSS in your \'custom\' stylesheets if you use other than \'default\' value for the Stylesheet folder.','dboxlite-slider'); ?></p> 
 <?php $dboxlite_slider_css = dboxlite_get_inline_css($cntr,$echo='1'); ?>
-<div style="font-family:monospace;font-size:13px;background:#ddd;">
+<div class="dboxlite_gcss" style="font-family:monospace;font-size:13px;background:#ddd;">
 .dboxlite_slider_set<?php echo $cntr;?>{<?php echo $dboxlite_slider_css['dboxlite_slider'];?>} <br />
 .dboxlite_slider_set<?php echo $cntr;?> .dboxlite_text{<?php echo $dboxlite_slider_css['dboxlite_text'];?>} <br />
 .dboxlite_slider_set<?php echo $cntr;?> .dboxlite_slider_thumbnail{<?php echo $dboxlite_slider_css['dboxlite_slider_thumbnail'];?>} <br />
@@ -806,13 +864,12 @@ else
 <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 </p>
 <input type="hidden" name="<?php echo $dboxlite_slider_options;?>[active_tab]" id="dboxlite_activetab" value="<?php echo $dboxlite_slider_curr['active_tab']; ?>" />
-<input type="hidden" name="set" id="set" value="<?php echo $s_set;?>" />
-<input type="hidden" name="embed_code" id="embed_code" value="" />
 <input type="hidden" name="<?php echo $dboxlite_slider_options;?>[new]" id="dboxlite_new_set" value="0" />
 <input type="hidden" name="<?php echo $dboxlite_slider_options;?>[popup]" id="dboxlitepopup" value="<?php echo $dboxlite_slider_curr['popup']; ?>" />
 <input type="hidden" name="oldnew" id="oldnew" value="<?php echo $dboxlite_slider_curr['new']; ?>" />
 <input type="hidden" name="hidden_preview" id="hidden_preview" value="<?php echo $dboxlite_slider_curr['preview']; ?>" />
 <input type="hidden" name="hidden_category" id="hidden_category" value="<?php echo $dboxlite_slider_curr['catg_slug']; ?>" />
+<input type="hidden" name="hidden_sliderid" id="hidden_sliderid" value="<?php echo $dboxlite_slider_curr['slider_id']; ?>" />
 </form>
 <!-- Added for shortcode to show on save of settings-->
 <div id="saveResult"></div>
@@ -827,6 +884,32 @@ else
 <td><select name="dboxlite_reset_settings" id="dboxlite_slider_reset_settings" >
 <option value="n" selected ><?php _e('None','dboxlite-slider'); ?></option>
 <option value="g" ><?php _e('Global Default','dboxlite-slider'); ?></option>
+<!-- Added for Reset Setting set v1.1 start-->
+<?php 
+$directory = DBOXLITE_SLIDER_CSS_DIR;
+if ($handle = opendir($directory)) {
+    while (false !== ($file = readdir($handle))) { 
+     if($file != '.' and $file != '..') { 
+	if($file!="sample" && $file!="default")      
+	{?>
+      <option value="<?php echo $file;?>"><?php echo "'".$file."' skin";?></option>
+ <?php } } }
+    closedir($handle);
+}
+?>
+<?php 
+for($i=1;$i<=$scounter;$i++){
+	if ($i==1){
+	  echo '<option value="'.$i.'" >'.__('Default Settings Set','dboxlite-slider').'</option>';
+	}
+	else {
+	  if($settings_set=get_option('dbox_slider_options'.$i)){
+		echo '<option value="'.$i.'" >'. (isset($settings_set['setname'])? ($settings_set['setname']) : '' ) .' (ID '.$i.')</option>';
+	  }
+	}
+}
+?>
+<!-- Added for Reset Setting set v1.1 end-->
 </select>
 </td>
 </tr>
@@ -850,7 +933,26 @@ else
 <?php $url = dboxlite_sslider_admin_url( array( 'page' => 'dboxlite-slider-admin' ) );?>
 <!---->
 <script type="text/javascript">
-
+ <?php 
+	$directory = DBOXLITE_SLIDER_CSS_DIR;
+	if ($handle = opendir($directory)) {
+	    while (false !== ($file = readdir($handle))) { 
+	     if($file != '.' and $file != '..') { 
+			$default_settings_str='default_settings_'.$file;
+	       		global ${$default_settings_str};
+			echo 'var '.$default_settings_str.' = '.json_encode(${$default_settings_str}).';';
+		} }
+	    closedir($handle);
+	}
+?>
+function checkskin(skin){ 
+	var skin_array=window['default_settings_'+skin];			
+	for (var key in skin_array) {
+	       var html_element='#dboxlite_slider_'+key;
+	       jQuery(html_element).val(skin_array[key]);
+	}
+	
+}  
 jQuery(document).ready(function($) {
 <?php if(isset($_GET['settings-updated'])) { if($_GET['settings-updated'] == 'true' and $dboxlite_slider_curr['popup'] == '1' ) { 
 ?>
@@ -864,68 +966,37 @@ jQuery('#saveResult').html("<div id='popup'><div class='modal_shortcode'>Quick E
 				});
 
 <?php }} ?>
+/* Added for settings tab collapse and expand - start */
+			jQuery(this).find(".sub-heading").on("click", function(){
+				var wrap=jQuery(this).parent('.toggle_settings'),
+				tabcontent=wrap.find("p, table, code, .dboxlite_gcss");
+				tabcontent.toggle();
+				var imgclass=wrap.find(".toggle_img");
+				if (tabcontent.css('display') == 'none') {
+					imgclass.attr("src", imgclass.attr("src").replace("<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>", "<?php echo dboxlite_slider_plugin_url( 'images/info.png' ); ?>"));
+				} else {
+					imgclass.attr("src", imgclass.attr("src").replace("<?php echo dboxlite_slider_plugin_url( 'images/info.png' ); ?>", "<?php echo dboxlite_slider_plugin_url( 'images/close.png' ); ?>"));
+				}
+			});
+/* Added for settings tab collapse and expand - end */
 
-	jQuery('#dboxlite_slider_form').submit(function(event) { 
-			//event.preventDefault();
-			/* Added for validations - Start */			
-			var slider_speed=jQuery("#dboxlite_slider_speed").val();
-			if(slider_speed=='' || slider_speed <= 0 || isNaN(slider_speed)) {
-				alert("Speed should be a number greater than 0!"); 
-				jQuery("#dboxlite_slider_speed").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_speed').offset().top-50}, 600);
-				return false;
-			}	
-			var slider_time=jQuery("#dboxlite_slider_time").val();
-			if(slider_time=='' || slider_time <= 0 || isNaN(slider_time)) {
-				alert("Transition interval should be a number greater than 0!"); 
-				jQuery("#dboxlite_slider_time").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_time').offset().top-50}, 600);
-				return false;
-			}	
-			var slider_no_posts=jQuery("#dboxlite_slider_no_posts").val();
-			if(slider_no_posts=='' || slider_no_posts <= 0 || isNaN(slider_no_posts)) {
-				alert("Max. Number of Posts in the DboxLite Slider should be greater than 0!"); 
-				jQuery("#dboxlite_slider_no_posts").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_no_posts').offset().top-50}, 600);
-				return false;
+});
+			/* Added for preview - start v1.1 */
+			var selpreview=jQuery("#dboxlite_slider_preview").val();
+			if(selpreview=='2')
+				jQuery("#dboxlite_slider_form .form-table tr.dboxlite_slider_params").css("display","none");
+			else if(selpreview=='1'){
+				jQuery("#dboxlite_slider_form .dboxlite_sid").css("display","none");
+				jQuery("#dboxlite_slider_form .form-table tr.dboxlite_slider_params").css("display","table-row");
+				jQuery("#dboxlite_slider_form .dboxlite_catslug").css("display","block");
 			}
+			else if(selpreview=='0'){
+				jQuery("#dboxlite_slider_form .dboxlite_catslug").css("display","none");
+				jQuery("#dboxlite_slider_form .form-table tr.dboxlite_slider_params").css("display","table-row");
+				jQuery("#dboxlite_slider_form .dboxlite_sid").css("display","block");
+			}  
+			/* Added for preview - end  v1.1*/ 
 			
-			var slider_width=jQuery("#dboxlite_slider_width").val();
-			if(slider_width=='' || slider_width <= 0 || isNaN(slider_width)) {
-				alert("Max. Slider Width should be greater than 0"); 
-				jQuery("#dboxlite_slider_width").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_width').offset().top-50}, 600);
-				return false;
-			}
-			var slider_height=jQuery("#dboxlite_slider_height").val();
-			if(slider_height=='' || slider_height <= 0 || isNaN(slider_height)) {
-				alert("Max. Slider Height should be greater than 0"); 
-				jQuery("#dboxlite_slider_height").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_height').offset().top-50}, 600);
-				return false;
-			}
-			/* Added for validations - End */
-			var slider_preview = jQuery("#dboxlite_slider_preview").val(),
-			    slider_catslug=jQuery("#dboxlite_slider_catslug").val(),
-			    set=jQuery("#set").val();
-			   
-			if(slider_preview == "1" && slider_catslug == ''){
-				alert("Category slug should be mentioned whose posts you want to display in slider");
-				jQuery("#dboxlite_slider_catslug").addClass('error');
-				jQuery("html,body").animate({scrollTop:jQuery('#dboxlite_slider_catslug').offset().top-50}, 600);
-				return false;
-			}
-
-  				
-			var prev=jQuery("#dboxlite_slider_preview").val(),
-			    hiddenpreview=jQuery("#hidden_preview").val(),
-			    new_save=jQuery("#oldnew").val(),
-			    hiddencatslug=jQuery("#hidden_category").val();
-			    if(hiddenpreview != prev || new_save=='1' || slider_catslug != hiddencatslug ) jQuery('#dboxlitepopup').val("1");					
-			else jQuery('#dboxlitepopup').val("0");	
-		});
-	});
-
 </script>
 
 <div style="margin:0 0 10px 0;"> 
@@ -978,12 +1049,12 @@ jQuery('#saveResult').html("<div id='popup'><div class='modal_shortcode'>Quick E
 " ><?php _e('Support Forum','dboxlite-slider'); ?></a></li>
 		<li><a href="http://guides.slidervilla.com/dboxlite-slider/" title="<?php _e('Usage Guide','dboxlite-slider'); ?>
 " ><?php _e('Usage Guide','dboxlite-slider'); ?></a></li>
-		<li><strong>Current Version: 1.0</strong></li>
+		<li><strong>Current Version: <?php echo DBOXLITE_SLIDER_VER;?></strong></li>
 		</ul> 
 	  </div> 
 	</div> 
 
-                 
+ 
 </div> <!--end of poststuff --> 
 
 <div style="clear:left;"></div>
