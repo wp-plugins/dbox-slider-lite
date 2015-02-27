@@ -3,8 +3,8 @@ Contributors: slidervilla
 Tags: 3d slider, best 3d slider, jquery slider, responsive, responsive 3d slider
 Donate link: http://www.clickonf5.org/go/donate-wp-plugins/ 
 Requires at least: 3.5
-Tested up to: 4.0
-Stable tag: 1.1
+Tested up to: 4.1.1
+Stable tag: 1.2
 License: GPLv2 or later
 
 Embed 3D Responsive Slider of Media Library Images, Recent Posts, Category Posts, Custom Post Type
@@ -106,6 +106,11 @@ FAQ section on: http://guides.slidervilla.com/dboxlite-slider/
 None
 
 == Changelog ==
+
+* 1.2 (02/27/2015)
+
+1. Fix - Slider height issue when width changed
+2. Fix - Responsiveness in case of mobile orientation changed
 
 * 1.1 (09/18/2014)
 

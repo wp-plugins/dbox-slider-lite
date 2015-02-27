@@ -38,8 +38,9 @@ font-size:16px;line-height: 30px;}
 .dboxlite_slider .dboxlite_perspective > div {position: absolute;-webkit-transform-style: preserve-3d;-moz-transform-style: preserve-3d;-o-transform-style: preserve-3d;-ms-transform-style: preserve-3d;transform-style: preserve-3d;-webkit-backface-visibility : hidden;-moz-backface-visibility : hidden;-o-backface-visibility : hidden;-ms-backface-visibility : hidden;backface-visibility : hidden;}
 /* dboxlite Side */
 .dboxlite_slider .dboxlite_side {margin: 0;display: block;position: absolute;-webkit-backface-visibility : hidden;-moz-backface-visibility : hidden;-o-backface-visibility : hidden;-ms-backface-visibility : hidden;backface-visibility : hidden;-webkit-transform-style: preserve-3d;-moz-transform-style: preserve-3d;-o-transform-style: preserve-3d;-ms-transform-style: preserve-3d;transform-style: preserve-3d;}
+.dboxlite_slider li.dboxlite_slideri{width:100%;}
 /* dboxlite Shadow */
-.dboxlite_slider .dboxlite_shadow {width: 100%;height: 168px;position: relative;margin-top: -110px;background: transparent url(images/shadow.png) no-repeat bottom center;background-size: 100% 100%;z-index: -1;display: none;}
+.dboxlite_slider .dboxlite_shadow {width: 100%;height: 168px;position: relative;margin-top: -110px;background: transparent url(images/shadow.png) no-repeat bottom center;background-size: 100% 100%;z-index: -1;display: none;max-width:100%;}
 /* Navigation Arrows */
 .dboxlite_slider .dboxlite_nav_arrows {display: none;}
 .dboxlite_slider .dboxlite_next{width: 42px;height: 42px;position: absolute;top: 40%;left: 2px;
@@ -58,6 +59,7 @@ text-indent: -9000px;cursor: pointer;border-radius: 50%;z-index: 100;opacity: 1;
 /* dboxlite Video */
 .dboxlite_slider .dboxlite_video{min-height:100% !important;width:100% !important;margin: 0 !important;position:absolute !important;top:0;left:0;}
 .dboxlite_slider .mejs-overlay-button{margin-left:-50px;}
+.dboxlite_slider iframe {height:100%;width:100%;}
 /* Validation Error */
 #dboxlite_slider_form input.error{border: 1px solid #D8000C; padding: 5px 0}
 

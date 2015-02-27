@@ -266,9 +266,9 @@
 				var outerwidth=self.$el.parent().width();
 				if(outerwidth>0)self.realWidth = outerwidth;
 				else self.realWidth = i.width;
-				self.$items.find('img.dboxlite_slider_thumbnail').width(self.realWidth);
+				//self.$items.find('img.dboxlite_slider_thumbnail').width(self.realWidth);
 
-				self.$el.parent().find('.dboxlite_shadow').css("max-width",self.realWidth);
+				//self.$el.parent().find('.dboxlite_shadow').css("max-width",self.realWidth);
 
 				// assuming all images with same size
 				self._setSize();
@@ -337,17 +337,23 @@
 		_setSize : function() {
 
 			var $visible = this.$items.eq( this.current );
-
-			var h,factor;
-			factor=($visible.width())/this.options.width;
+			var w,h,factor;
+			w=this.$el.parent().width();
+			if(w<1)	w=$visible.width();
+			factor=w/this.options.width;
 			h=factor*(this.options.height-60);
 			
 			this.size = {
-				width	: $visible.width(),
+				width	: w,
 				height	: h
 			};
+			this.$el.css( {
+				'max-width' : w
+			});
+
 			this.$items.height(h);
-			this.$items.find('img').height(h);
+			this.$items.find('img.dboxlite_slider_thumbnail').height(h);
+			this.$items.find('img.dboxlite_slider_thumbnail').width(w);
 		},
 		_setStyle : function() {
 
@@ -951,6 +957,10 @@ function dboxlite_slider_init(args) {
 			speed : args.options.speed,
 			autoplay : args.options.autoplay,
 			interval: args.options.interval,
+			/* Added 1.1.1 */
+			height: args.options.height,	
+			width: args.options.width,
+			/* END Added 1.1.1 */
 			maxCuboidsCount: args.options.cubes,
 			onReady : function() {
 				$navOptions.hide();

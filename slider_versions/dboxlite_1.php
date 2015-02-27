@@ -375,7 +375,7 @@ function dboxlite_get_inline_css($set='',$echo='0'){
 		$dboxlite_slider_css['dboxlite_slider_span']=$style_start.'font-family:'. $content_fontg . ' '.$dboxlite_slider_curr['content_font'].', Arial, Helvetica, sans-serif;font-size:'.$dboxlite_slider_curr['content_fsize'].'px;font-weight:'.$content_fweight.';font-style:'.$content_fstyle.';color:'. $dboxlite_slider_curr['content_fcolor'].';'.$style_end;
 		
 	//dboxlite_slider_thumbnail
-		$dboxlite_slider_css['dboxlite_slider_thumbnail']=$style_start.'width:'.$dboxlite_slider_curr['width'].'px;position: relative;max-height:'.($dboxlite_slider_curr['height']-60).'px;'.$style_end;
+		$dboxlite_slider_css['dboxlite_slider_thumbnail']=$style_start.'max-width:'.$dboxlite_slider_curr['width'].'px;position: relative;max-height:'.($dboxlite_slider_curr['height']-60).'px;'.$style_end;
 	
 	
 	//dboxlite_text
