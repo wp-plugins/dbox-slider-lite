@@ -3,7 +3,7 @@ Contributors: slidervilla
 Tags: 3d slider, best 3d slider, jquery slider, responsive, responsive 3d slider
 Donate link: http://www.clickonf5.org/go/donate-wp-plugins/ 
 Requires at least: 3.5
-Tested up to: 4.1.1
+Tested up to: 4.2
 Stable tag: 1.2
 License: GPLv2 or later
 
