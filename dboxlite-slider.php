@@ -2,7 +2,7 @@
 Plugin Name: Dbox Slider Lite
 Plugin URI: http://slidervilla.com/dbox-lite/
 Description: DBOXLITE slider adds a very beautiful 3D responsive Slider to your site with a graceful fallback on IE and Old browsers.
-Version: 1.2
+Version: 1.2.1
 Author: SliderVilla
 Author URI: http://slidervilla.com/
 Wordpress version supported: 3.5 and above
@@ -25,7 +25,7 @@ License: GPL2
 //defined global variables and constants here
 global $dboxlite_slider,$default_dboxlite_slider_settings,$dboxlite_db_version;
 $dboxlite_slider = get_option('dbox_slider_options');
-$dboxlite_db_version='1.2';
+$dboxlite_db_version='1.2.1';
 $default_dboxlite_slider_settings = array('speed'=>'6', 
 						   'no_posts'=>'8',
 						   'width'=>'640',
@@ -97,7 +97,7 @@ $default_dboxlite_slider_settings = array('speed'=>'6',
 define('DBOXLITE_SLIDER_TABLE','dbox_slider'); //Slider TABLE NAME
 define('DBOXLITE_SLIDER_META','dbox_slider_meta'); //Meta TABLE NAME
 define('DBOXLITE_SLIDER_POST_META','dbox_slider_postmeta'); //Meta TABLE NAME
-define("DBOXLITE_SLIDER_VER","1.2",false);//Current Version of DboxLite Slider
+define("DBOXLITE_SLIDER_VER","1.2.1",false);//Current Version of DboxLite Slider
 if ( ! defined( 'DBOXLITE_SLIDER_PLUGIN_BASENAME' ) )
 	define( 'DBOXLITE_SLIDER_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 if ( ! defined( 'DBOXLITE_SLIDER_CSS_DIR' ) ){

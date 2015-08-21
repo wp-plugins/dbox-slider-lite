@@ -3,7 +3,7 @@ if(!class_exists('Dbox_Slider_Simple_Widget')){
 	class Dbox_Slider_Simple_Widget extends WP_Widget {
 		function Dbox_Slider_Simple_Widget() {
 			$widget_options = array('classname' => 'dbox_slider_wclass', 'description' => 'Insert Dbox Slider' );
-			$this->WP_Widget('dbox_sslider_wid', 'Dbox Slider - Simple', $widget_options);
+			parent::__construct('dbox_sslider_wid', 'Dbox Slider - Simple', $widget_options);
 		}
 
 		function widget($args, $instance) {
@@ -50,7 +50,7 @@ if(!class_exists('Dbox_Slider_Category_Widget')){
 	class Dbox_Slider_Category_Widget extends WP_Widget {
 		function Dbox_Slider_Category_Widget() {
 			$widget_options = array('classname' => 'dbox_sliderc_wclass', 'description' => 'Dbox Category Slider' );
-			$this->WP_Widget('dbox_ssliderc_wid', 'Dbox Slider - Category', $widget_options);
+			parent::__construct('dbox_ssliderc_wid', 'Dbox Slider - Category', $widget_options);
 		}
 
 		function widget($args, $instance) {
@@ -117,7 +117,7 @@ if(!class_exists('Dbox_Slider_Recent_Widget')){
 	class Dbox_Slider_Recent_Widget extends WP_Widget {
 		function Dbox_Slider_Recent_Widget() {
 			$widget_options = array('classname' => 'dbox_sliderr_wclass', 'description' => 'Dbox Recent Posts Slider' );
-			$this->WP_Widget('dbox_ssliderr_wid', 'Dbox Slider - Recent Posts', $widget_options);
+			parent::__construct('dbox_ssliderr_wid', 'Dbox Slider - Recent Posts', $widget_options);
 		}
 
 		function widget($args, $instance) {
